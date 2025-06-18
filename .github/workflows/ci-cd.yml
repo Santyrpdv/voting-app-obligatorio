@@ -1,0 +1,100 @@
+name: CI/CD Pipeline
+
+# Se dispara en cada push a dev, test o main
+on:
+  push:
+    branches:
+      - dev
+      - test
+      - main
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build & Push vote image
+        run: |
+          docker build -t vote:latest ./vote
+          docker tag vote:latest ${{ secrets.ECR_VOTE_REPO }}:latest
+          docker push ${{ secrets.ECR_VOTE_REPO }}:latest
+
+      - name: Build & Push result image
+        run: |
+          docker build -t result:latest ./result
+          docker tag result:latest ${{ secrets.ECR_RESULT_REPO }}:latest
+          docker push ${{ secrets.ECR_RESULT_REPO }}:latest
+
+      - name: Build & Push worker image
+        run: |
+          docker build -t worker:latest ./worker
+          docker tag worker:latest ${{ secrets.ECR_WORKER_REPO }}:latest
+          docker push ${{ secrets.ECR_WORKER_REPO }}:latest
+
+  deploy-infra:
+    name: Terraform & Kubernetes Deploy
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Select TF var-file by branch
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/dev" ]; then echo "TFVARS=dev.tfvars" >> $GITHUB_ENV; fi
+          if [ "${{ github.ref }}" == "refs/heads/test" ]; then echo "TFVARS=test.tfvars" >> $GITHUB_ENV; fi
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then echo "TFVARS=prod.tfvars" >> $GITHUB_ENV; fi
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./infra
+
+      - name: Terraform Plan
+        run: terraform plan -var-file=./infra/${TFVARS}
+        working-directory: ./infra
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var-file=./infra/${TFVARS}
+        working-directory: ./infra
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.EKS_CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Deploy Kubernetes Manifests
+        run: |
+          kubectl apply -f k8s-specifications/00-configMap.yaml
+          kubectl apply -f k8s-specifications/01-deployment.yaml
+          kubectl apply -f k8s-specifications/02-services.yaml
+          kubectl apply -f k8s-specifications/03-ingress.yaml
