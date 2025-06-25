@@ -32,8 +32,8 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/test" ]]; then echo "TFVARS=test.tfvars" >> $GITHUB_ENV; fi
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then echo "TFVARS=prod.tfvars" >> $GITHUB_ENV; fi
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Terraform Init (with backend)
+        run: terraform init -reconfigure
         working-directory: .infra/terraform
 
       - name: Cargar nombre de cluster desde TFVARS
