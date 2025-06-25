@@ -110,9 +110,20 @@ resource "aws_eks_node_group" "node_group" {
 
   depends_on = [aws_eks_cluster.eks]
 }
-resource "aws_ecr_repository" "vote"   { name = "vote"   }
-resource "aws_ecr_repository" "result" { name = "result" }
-resource "aws_ecr_repository" "worker" { name = "worker" }
+resource "aws_ecr_repository" "vote" {
+  name         = "vote"
+  force_delete = true
+}
+
+resource "aws_ecr_repository" "result" {
+  name         = "result"
+  force_delete = true
+}
+
+resource "aws_ecr_repository" "worker" {
+  name         = "worker"
+  force_delete = true
+}
 
 output "vote_ecr_url"   { value = aws_ecr_repository.vote.repository_url   }
 output "result_ecr_url" { value = aws_ecr_repository.result.repository_url }
