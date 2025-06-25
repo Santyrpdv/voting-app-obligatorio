@@ -53,7 +53,7 @@ jobs:
     name: Test & Quality Gates
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/test'
-    needs: dev-ci
+    needs: deploy-infra
 
     steps:
       - name: Checkout code
