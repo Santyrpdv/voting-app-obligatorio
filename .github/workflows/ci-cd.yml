@@ -114,6 +114,7 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
+          
       - name: Cargar nombre del cluster desde archivo TFVARS
         run: |
           EKS_NAME=$(grep '^cluster_name' .infra/terraform/${TFVARS} | awk -F '"' '{print $2}')
