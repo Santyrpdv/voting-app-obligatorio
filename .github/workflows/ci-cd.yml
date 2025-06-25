@@ -45,11 +45,11 @@ jobs:
         working-directory: .infra/terraform
 
       - name: Terraform Plan
-        run: terraform plan -var-file=${{ env.TFVARS }}
+        run: terraform plan -out=tfplan -var-file=${{ env.TFVARS }}
         working-directory: .infra/terraform
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file=${{ env.TFVARS }}
+        run: terraform apply -auto-approve tfplan
         working-directory: .infra/terraform
 
   # 2️⃣ Docker - Build y push a ECR
