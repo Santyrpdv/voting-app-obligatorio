@@ -12,7 +12,6 @@ env:
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
 jobs:
-
   deploy-infra:
     name: Terraform & EKS Infra
     runs-on: ubuntu-latest
@@ -51,61 +50,61 @@ jobs:
         working-directory: .infra/terraform
 
   test-ci:
-  name: Test & Quality Gates
-  runs-on: ubuntu-latest
-  if: github.ref == 'refs/heads/test'
-  needs: dev-ci
+    name: Test & Quality Gates
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/test'
+    needs: dev-ci
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK for SonarCloud
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - name: Set up JDK for SonarCloud
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-    - name: Cache SonarCloud packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.sonar/cache
-        key: ${{ runner.os }}-sonar
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
 
-    - name: Install SonarCloud Scanner
-      run: |
-        curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-        unzip sonar-scanner.zip -d $HOME
-        echo "$HOME/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
+      - name: Install SonarCloud Scanner
+        run: |
+          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip sonar-scanner.zip -d $HOME
+          echo "$HOME/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
 
-    - name: Run SonarCloud Scan
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: sonar-scanner
+      - name: Run SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: sonar-scanner
 
-    - name: Install Trivy
-      run: |
-        sudo apt-get install wget -y
-        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_Linux-64bit.deb
-        sudo dpkg -i trivy_0.50.0_Linux-64bit.deb
+      - name: Install Trivy
+        run: |
+          sudo apt-get install wget -y
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.50.0_Linux-64bit.deb
 
-    - name: Docker Build (Vote)
-      run: docker build -t vote-app-test .app/vote
+      - name: Docker Build (Vote)
+        run: docker build -t vote-app-test .app/vote
 
-    - name: Trivy Scan
-      run: trivy image --exit-code 1 --severity HIGH,CRITICAL vote-app-test
+      - name: Trivy Scan
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL vote-app-test
 
-    - name: Run Docker Container
-      run: docker run -d -p 8080:80 --name vote-test vote-app-test
+      - name: Run Docker Container
+        run: docker run -d -p 8080:80 --name vote-test vote-app-test
 
-    - name: Wait for container
-      run: sleep 5
+      - name: Wait for container
+        run: sleep 5
 
-    - name: Integration Test (curl)
-      run: curl --fail http://localhost:8080 || exit 1
+      - name: Integration Test (curl)
+        run: curl --fail http://localhost:8080 || exit 1
 
-    - name: Clean up
-      run: docker stop vote-test && docker rm vote-test
+      - name: Clean up
+        run: docker stop vote-test && docker rm vote-test
 
   build-and-push:
     name: Build & Push Docker Images
@@ -166,7 +165,7 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'latest'
+          version: "latest"
 
       - name: Seleccionar archivo TFVARS por rama
         run: |
