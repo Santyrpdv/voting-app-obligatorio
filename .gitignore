@@ -4,3 +4,24 @@ bin/
 obj/
 .vs/
 node_modules/
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+.infra/terraform/.terraform
+
+# Claves privadas y archivos sensibles
+*.pem
+
+# Kubernetes (si aplicás manifests locales)
+k8s/*.yaml
+
+# VSCode y sistema
+.vscode/
+*.log
+
+# Node / Frontend (si aplica)
+node_modules/
+dist/
+.env
