@@ -77,15 +77,15 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./infra
+        working-directory: ./.infra/terraform
 
       - name: Terraform Plan
         run: terraform plan -var-file=./infra/${TFVARS}
-        working-directory: ./infra
+        working-directory: ./.infra/terraform
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -var-file=./infra/${TFVARS}
-        working-directory: ./infra
+        working-directory: ./.infra/terraform
 
       - name: Update kubeconfig for EKS
         run: |
