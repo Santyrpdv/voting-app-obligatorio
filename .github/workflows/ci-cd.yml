@@ -34,19 +34,19 @@ jobs:
 
       - name: Build & Push vote image
         run: |
-          docker build -t vote:latest ./vote
+          docker build -t vote:latest ./.app/vote
           docker tag vote:latest ${{ secrets.ECR_VOTE_REPO }}:latest
           docker push ${{ secrets.ECR_VOTE_REPO }}:latest
 
       - name: Build & Push result image
         run: |
-          docker build -t result:latest ./result
+          docker build -t result:latest ./.app/result
           docker tag result:latest ${{ secrets.ECR_RESULT_REPO }}:latest
           docker push ${{ secrets.ECR_RESULT_REPO }}:latest
 
       - name: Build & Push worker image
         run: |
-          docker build -t worker:latest ./worker
+          docker build -t worker:latest ./app/worker
           docker tag worker:latest ${{ secrets.ECR_WORKER_REPO }}:latest
           docker push ${{ secrets.ECR_WORKER_REPO }}:latest
 
