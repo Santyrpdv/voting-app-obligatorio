@@ -122,9 +122,6 @@ jobs:
           EKS_NAME=$(grep '^cluster_name' .infra/terraform/${TFVARS} | awk -F '"' '{print $2}')
           echo "EKS_CLUSTER_NAME=$EKS_NAME" >> $GITHUB_ENV
 
-      - name: Mostrar nombre del cluster
-        run: echo "Cluster name: ${{ env.EKS_CLUSTER_NAME }}"
-        
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig \
