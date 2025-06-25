@@ -11,6 +11,8 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+  ECR_REGISTRY: 928352609536.dkr.ecr.us-east-1.amazonaws.com
+
 
 jobs:
   build-and-push:
@@ -32,23 +34,20 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build & Push vote image
+      - name: Build and push vote image
         run: |
-          docker build -t vote:latest ./.app/vote
-          docker tag vote:latest ${{ secrets.ECR_VOTE_REPO }}:latest
-          docker push ${{ secrets.ECR_VOTE_REPO }}:latest
+          docker build -t $ECR_REGISTRY/obligatorio-sparis-vote ./vote
+          docker push $ECR_REGISTRY/obligatorio-sparis-vote
 
-      - name: Build & Push result image
+      - name: Build and push result image
         run: |
-          docker build -t result:latest ./.app/result
-          docker tag result:latest ${{ secrets.ECR_RESULT_REPO }}:latest
-          docker push ${{ secrets.ECR_RESULT_REPO }}:latest
+          docker build -t $ECR_REGISTRY/obligatorio-sparis-result ./result
+          docker push $ECR_REGISTRY/obligatorio-sparis-result
 
-      - name: Build & Push worker image
+      - name: Build and push worker image
         run: |
-          docker build -t worker:latest ./app/worker
-          docker tag worker:latest ${{ secrets.ECR_WORKER_REPO }}:latest
-          docker push ${{ secrets.ECR_WORKER_REPO }}:latest
+          docker build -t $ECR_REGISTRY/obligatorio-sparis-worker ./worker
+          docker push $ECR_REGISTRY/obligatorio-sparis-worker
 
   deploy-infra:
     name: Terraform & Kubernetes Deploy
