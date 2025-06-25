@@ -1,14 +1,14 @@
-name: Destroy Terraform Infrastructure
+name: Destroy Infrastructure
 
 on:
-  workflow_dispatch:  # Solo se ejecuta manualmente desde GitHub
+  workflow_dispatch:  # Solo ejecutable manualmente
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
 
 jobs:
   destroy:
+    name: Terraform Destroy
     runs-on: ubuntu-latest
 
     steps:
@@ -26,13 +26,23 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Select TF var-file by branch
+      - name: Seleccionar archivo TFVARS por rama
         run: |
-          echo "TFVARS=dev.tfvars" >> $GITHUB_ENV  # o test.tfvars / prod.tfvars
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then echo "TFVARS=dev.tfvars" >> $GITHUB_ENV; fi
+          if [[ "${{ github.ref }}" == "refs/heads/test" ]]; then echo "TFVARS=test.tfvars" >> $GITHUB_ENV; fi
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then echo "TFVARS=prod.tfvars" >> $GITHUB_ENV; fi
 
       - name: Terraform Init
         run: terraform init
         working-directory: .infra/terraform
+
+      - name: Cargar nombre de cluster desde TFVARS
+        run: |
+          EKS_NAME=$(grep '^cluster_name' .infra/terraform/${TFVARS} | awk -F '"' '{print $2}')
+          echo "EKS_CLUSTER_NAME=$EKS_NAME" >> $GITHUB_ENV
+
+      - name: Mostrar nombre del cluster
+        run: echo "Cluster a eliminar: $EKS_CLUSTER_NAME"
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -var-file=${{ env.TFVARS }}

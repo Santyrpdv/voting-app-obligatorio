@@ -9,12 +9,10 @@ on:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
 jobs:
 
-  # 1️⃣ Terraform - Infraestructura
   deploy-infra:
     name: Terraform & EKS Infra
     runs-on: ubuntu-latest
@@ -34,11 +32,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Select TF var-file by branch
+      - name: Seleccionar archivo TFVARS por rama
         run: |
-          if [ "${{ github.ref }}" == "refs/heads/dev" ]; then echo "TFVARS=dev.tfvars" >> $GITHUB_ENV; fi
-          if [ "${{ github.ref }}" == "refs/heads/test" ]; then echo "TFVARS=test.tfvars" >> $GITHUB_ENV; fi
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then echo "TFVARS=prod.tfvars" >> $GITHUB_ENV; fi
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then echo "TFVARS=dev.tfvars" >> $GITHUB_ENV; fi
+          if [[ "${{ github.ref }}" == "refs/heads/test" ]]; then echo "TFVARS=test.tfvars" >> $GITHUB_ENV; fi
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then echo "TFVARS=prod.tfvars" >> $GITHUB_ENV; fi
 
       - name: Terraform Init
         run: terraform init
@@ -52,7 +50,6 @@ jobs:
         run: terraform apply -auto-approve tfplan
         working-directory: .infra/terraform
 
-  # 2️⃣ Docker - Build y push a ECR
   build-and-push:
     name: Build & Push Docker Images
     runs-on: ubuntu-latest
@@ -73,7 +70,7 @@ jobs:
       - name: Export ECR_REGISTRY
         run: |
           echo "ECR_REGISTRY=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${AWS_REGION}.amazonaws.com" >> $GITHUB_ENV
-      
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
@@ -92,7 +89,6 @@ jobs:
           docker build -t $ECR_REGISTRY/worker ./.app/worker
           docker push $ECR_REGISTRY/worker
 
-  # 3️⃣ Kubernetes - Despliegue con kubectl
   deploy-k8s:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
@@ -114,20 +110,26 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
-          
+
+      - name: Seleccionar archivo TFVARS por rama
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then echo "TFVARS=dev.tfvars" >> $GITHUB_ENV; fi
+          if [[ "${{ github.ref }}" == "refs/heads/test" ]]; then echo "TFVARS=test.tfvars" >> $GITHUB_ENV; fi
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then echo "TFVARS=prod.tfvars" >> $GITHUB_ENV; fi
+
       - name: Cargar nombre de cluster desde TFVARS
         run: |
           EKS_NAME=$(grep '^cluster_name' .infra/terraform/${TFVARS} | awk -F '"' '{print $2}')
           echo "EKS_CLUSTER_NAME=$EKS_NAME" >> $GITHUB_ENV
 
-      - name: Verificar nombre del cluster cargado
+      - name: Mostrar nombre del cluster
         run: echo "Cluster name: $EKS_CLUSTER_NAME"
 
       - name: Update kubeconfig for EKS
         run: |
           aws eks update-kubeconfig \
-            --name ${{ env.EKS_CLUSTER_NAME }} \
-            --region ${{ env.AWS_REGION }}
+            --name $EKS_CLUSTER_NAME \
+            --region $AWS_REGION
 
       - name: Deploy Kubernetes Manifests
         run: |
