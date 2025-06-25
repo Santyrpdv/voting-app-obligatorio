@@ -98,7 +98,7 @@ resource "aws_eks_node_group" "node_group" {
   }
 
   instance_types = ["t3.small"]
-  ami_type       = "AL2_x86_64"
+  ami_type       = "BOTTLEROCKET_x86_64"
 
   remote_access {
     ec2_ssh_key = aws_key_pair.key.key_name
