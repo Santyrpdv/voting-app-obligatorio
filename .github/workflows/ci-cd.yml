@@ -36,17 +36,17 @@ jobs:
 
       - name: Build and push vote image
         run: |
-          docker build -t $ECR_REGISTRY/obligatorio-sparis-vote ./vote
+          docker build -t $ECR_REGISTRY/obligatorio-sparis-vote ./.app/vote
           docker push $ECR_REGISTRY/obligatorio-sparis-vote
 
       - name: Build and push result image
         run: |
-          docker build -t $ECR_REGISTRY/obligatorio-sparis-result ./result
+          docker build -t $ECR_REGISTRY/obligatorio-sparis-result ./.app/result
           docker push $ECR_REGISTRY/obligatorio-sparis-result
 
       - name: Build and push worker image
         run: |
-          docker build -t $ECR_REGISTRY/obligatorio-sparis-worker ./worker
+          docker build -t $ECR_REGISTRY/obligatorio-sparis-worker ./.app/worker
           docker push $ECR_REGISTRY/obligatorio-sparis-worker
 
   deploy-infra:
