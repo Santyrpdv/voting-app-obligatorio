@@ -1,6 +1,5 @@
 name: CI/CD Pipeline
 
-# Se dispara en cada push a dev, test o main
 on:
   push:
     branches:
@@ -11,91 +10,4 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
-  ECR_REGISTRY: 928352609536.dkr.ecr.us-east-1.amazonaws.com
-
-
-jobs:
-  build-and-push:
-    name: Build & Push Docker Images
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build and push vote image
-        run: |
-          docker build -t $ECR_REGISTRY/obligatorio-sparis-vote ./.app/vote
-          docker push $ECR_REGISTRY/obligatorio-sparis-vote
-
-      - name: Build and push result image
-        run: |
-          docker build -t $ECR_REGISTRY/obligatorio-sparis-result ./.app/result
-          docker push $ECR_REGISTRY/obligatorio-sparis-result
-
-      - name: Build and push worker image
-        run: |
-          docker build -t $ECR_REGISTRY/obligatorio-sparis-worker ./.app/worker
-          docker push $ECR_REGISTRY/obligatorio-sparis-worker
-
-  deploy-infra:
-    name: Terraform & Kubernetes Deploy
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Select TF var-file by branch
-        run: |
-          if [ "${{ github.ref }}" == "refs/heads/dev" ]; then echo "TFVARS=dev.tfvars" >> $GITHUB_ENV; fi
-          if [ "${{ github.ref }}" == "refs/heads/test" ]; then echo "TFVARS=test.tfvars" >> $GITHUB_ENV; fi
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then echo "TFVARS=prod.tfvars" >> $GITHUB_ENV; fi
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./.infra/terraform
-
-      - name: Terraform Plan
-        run: terraform plan #-var-file=./.infra/terraform/${TFVARS}
-        working-directory: ./.infra/terraform
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve #-var-file=./.infra/terraform/${TFVARS}
-        working-directory: ./.infra/terraform
-
-      - name: Update kubeconfig for EKS
-        run: |
-          aws eks update-kubeconfig \
-            --name ${{ env.EKS_CLUSTER_NAME }} \
-            --region ${{ env.AWS_REGION }}
-
-      - name: Deploy Kubernetes Manifests
-        run: |
-          kubectl apply -f k8s-specifications/00-configMap.yaml
-          kubectl apply -f k8s-specifications/01-deployment.yaml
-          kubectl apply -f k8s-specifications/02-services.yaml
-          kubectl apply -f k8s-specifications/03-ingress.yaml
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secret_
