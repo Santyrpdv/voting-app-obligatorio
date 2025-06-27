@@ -9,3 +9,8 @@ cluster_name = "dev-eks"
 
 node_group_name = "dev-node-group"
 
+existing_role_arn = "arn:aws:iam::<tu-account-id>:role/LabRole"
+
+
+
+

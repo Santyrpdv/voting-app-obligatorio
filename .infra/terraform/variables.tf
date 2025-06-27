@@ -10,6 +10,7 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
+
 variable "public_subnet_cidrs" {
   description = "The CIDR blocks for the public subnets"
   type        = list(string)
@@ -32,4 +33,9 @@ variable "node_group_name" {
   description = "The name of the EKS node group"
   type        = string
  default     = "demo-node-group"
+}
+
+variable "existing_role_arn" {
+  description = "ARN de IAM "
+  type        = string
 }
