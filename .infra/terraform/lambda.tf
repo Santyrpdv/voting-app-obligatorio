@@ -29,7 +29,7 @@ resource "aws_lambda_function" "healthcheck" {
   runtime       = "python3.11"
   filename      = "healthcheck-lambda.zip"
   timeout       = 10
-  source_code_hash = filebase64sha256("healthcheck.zip")
+  source_code_hash = filebase64sha256("healthcheck-lambda.zip")
 
   environment {
     variables = {
