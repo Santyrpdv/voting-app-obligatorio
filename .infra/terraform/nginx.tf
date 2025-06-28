@@ -2,12 +2,7 @@
 data "aws_eks_cluster_auth" "eks_auth" {
   name = aws_eks_cluster.eks.name
 }
-data "kubernetes_service" "ingress_nginx" {
-  metadata {
-    name      = "ingress-nginx-controller"
-    namespace = "ingress-nginx"
-  }
-}
+
 
 
 resource "helm_release" "nginx_ingress" {

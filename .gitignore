@@ -5,6 +5,8 @@ obj/
 .vs/
 node_modules/
 # Terraform
+lambda.tf
+
 *.tfstate
 *.tfstate.backup
 .terraform/
