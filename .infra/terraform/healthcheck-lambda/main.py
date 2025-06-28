@@ -1,18 +1,16 @@
+import os
 import urllib.request
 import logging
-import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def handler(event, context):
-    urls_string = os.getenv("URLS", "")
-    urls = urls_string.split(",") if urls_string else []
-
-    if not urls:
-        logger.warning("No URLs provided in environment variable 'URLS'.")
-        return
-
+    hostname = os.environ.get("ALB_HOSTNAME")
+    urls = [
+        f"http://{hostname}/vote",
+        f"http://{hostname}/result"
+    ]
     for url in urls:
         try:
             response = urllib.request.urlopen(url, timeout=5)
