@@ -41,10 +41,6 @@ jobs:
         run: terraform init
         working-directory: .infra/terraform
 
-      - name: Set up kubeconfig for EKS
-        run: |
-          aws eks update-kubeconfig --region us-east-1 --name ${{ env.TFVARS }}-eks 
-
       - name: Terraform Plan
         run: terraform plan -out=tfplan -var-file=${{ env.TFVARS }}
         working-directory: .infra/terraform
