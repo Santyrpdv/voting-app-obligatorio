@@ -1,15 +1,15 @@
-import os
 import urllib.request
 import logging
+import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def handler(event, context):
-    hostname = os.environ.get("ALB_HOSTNAME")
+    base_url = os.environ.get("ALB_HOSTNAME")
     urls = [
-        f"http://{hostname}/vote",
-        f"http://{hostname}/result"
+        f"http://{base_url}/vote",
+        f"http://{base_url}/result"
     ]
     for url in urls:
         try:
