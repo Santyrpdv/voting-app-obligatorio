@@ -171,7 +171,7 @@ jobs:
       name: Manual Approval
       runs-on: ubuntu-latest
       needs: build-and-push
-      if: github.ref == 'refs/heads/main'
+      #if: github.ref == 'refs/heads/main'
       steps:
         - name: Esperar aprobación
           uses: trstringer/manual-approval@v1
