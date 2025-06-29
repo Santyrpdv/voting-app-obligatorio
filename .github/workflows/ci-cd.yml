@@ -176,6 +176,7 @@ jobs:
           with:
             secret: ${{ secrets.GITHUB_TOKEN }}
             minimum-approvals: 1
+            approvers: Santyrpdv
             issue-title: "Aprobación requerida para producción"
             issue-body: "Confirma escribiendo 'approve' como comentario para continuar."
 
