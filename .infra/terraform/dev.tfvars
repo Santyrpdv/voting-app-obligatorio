@@ -1,6 +1,6 @@
 project_name   = "obligatorio-sparis"
 environment    = "dev"
-aws_region 
+aws_region  = "us-east-1a"
 
 
 vpc_name = "dev-vpc"
