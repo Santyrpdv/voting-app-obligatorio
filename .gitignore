@@ -6,7 +6,6 @@ obj/
 node_modules/
 # Terraform
 lambda.tf
-dashboard.tf
 
 *.tfstate
 *.tfstate.backup
