@@ -79,7 +79,14 @@ jobs:
       - name: Run SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: sonar-scanner
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=Santyrpdv_devOps \
+            -Dsonar.organization=santyrpdv \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.sources=. \
+            -Dsonar.projectVersion=1.0
 
       - name: Install Trivy
         run: |
