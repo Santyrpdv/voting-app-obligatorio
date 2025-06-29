@@ -52,7 +52,6 @@ jobs:
   test-ci:
     name: Test & Quality Gates
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/test'
     needs: deploy-infra
 
     steps:
