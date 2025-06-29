@@ -18,6 +18,8 @@ FROM base AS dev
 RUN pip install watchdog
 ENV FLASK_ENV=development
 CMD ["python", "app.py"]
+RUN pip install --upgrade setuptools==78.1.1
+
 
 # final defines the stage that will bundle the application for production
 FROM base AS final
