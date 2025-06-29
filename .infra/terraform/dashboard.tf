@@ -16,7 +16,7 @@ resource "aws_cloudwatch_dashboard" "monitor_dashboard" {
           metrics = [
             ["AWS/ECS", "CPUUtilization", "ClusterName", var.cluster_name, "ServiceName", var.service_name]
           ]
-          period = 300
+          period = 30
           stat = "Average"
         }
       }
@@ -29,7 +29,7 @@ resource "aws_cloudwatch_metric_alarm" "high_cpu" {
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
   namespace           = "AWS/ECS"
-  period              = 300
+  period              = 30
   statistic           = "Average"
   threshold           = 70
   alarm_description   = "La CPU está por encima del 70%"
@@ -72,7 +72,7 @@ resource "aws_cloudwatch_dashboard" "eks_multi_env" {
           "stat"  : "Average",
           "view"  : "timeSeries",
           "region": var.aws_region,
-          "period": 300,
+          "period": 30,
           "metrics": [
             [ "AWS/ContainerInsights", "cpu_usage_total", "ClusterName", "dev-eks",  { "label": "dev"  } ],
             [ "...",                   "cpu_usage_total", "ClusterName", "test-eks", { "label": "test" } ],
