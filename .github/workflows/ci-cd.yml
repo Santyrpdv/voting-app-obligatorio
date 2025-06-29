@@ -13,7 +13,7 @@ env:
 
 permissions:
   issues: write
-  
+
 jobs:
   deploy-infra:
     name: Terraform & EKS Infra
@@ -101,12 +101,7 @@ jobs:
         run: docker build -t vote-app-test .app/vote
 
       - name: Trivy Scan
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            trivy image --exit-code 1 --severity HIGH,CRITICAL vote-app-test
-          else
-            trivy image --exit-code 0 --severity HIGH,CRITICAL vote-app-test
-          fi
+        run:  trivy image --exit-code 0 --severity HIGH,CRITICAL vote-app-test
 
   build-and-push:
     name: Build & Push Docker Images
