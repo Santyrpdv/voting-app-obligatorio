@@ -43,11 +43,6 @@ variable "service_name" {
 }
 
 
-variable "cluster_name" {
-  description = "The name of the EKS cluster"
-  type        = string
-  default     = "demo-eks"
-}
 
 variable "node_group_name" {
   description = "The name of the EKS node group"
