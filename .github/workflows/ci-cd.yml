@@ -146,27 +146,27 @@ jobs:
           docker build -t $ECR_REGISTRY/worker ./.app/worker
           docker push $ECR_REGISTRY/worker
 
-  ecr-cleanup:
-      name: Trigger ECR Cleanup Lambda
-      runs-on: ubuntu-latest
-      needs: build-and-push  
+  # ecr-cleanup:
+  #     name: Trigger ECR Cleanup Lambda
+  #     runs-on: ubuntu-latest
+  #     needs: build-and-push  
 
-      steps:
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v2
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-            aws-region: ${{ env.AWS_REGION }}
+  #     steps:
+  #       - name: Configure AWS credentials
+  #         uses: aws-actions/configure-aws-credentials@v2
+  #         with:
+  #           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+  #           aws-region: ${{ env.AWS_REGION }}
 
-        - name: Invoke Lambda to clean old ECR images
-          run: |
-            aws lambda invoke \
-              --function-name ecr-cleanup \
-              --invocation-type Event \
-              --region $AWS_REGION \
-              out.json
+  #       - name: Invoke Lambda to clean old ECR images
+  #         run: |
+  #           aws lambda invoke \
+  #             --function-name ecr-cleanup \
+  #             --invocation-type Event \
+  #             --region $AWS_REGION \
+  #             out.json
 
   approve-prod:
       name: Manual Approval
