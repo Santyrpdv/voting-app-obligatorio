@@ -90,9 +90,9 @@ jobs:
 
       - name: Install Trivy
         run: |
-          sudo apt-get install wget -y
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.0_Linux-64bit.deb
-          sudo dpkg -i trivy_0.50.0_Linux-64bit.deb
+          TRIVY_VERSION=$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep tag_name | cut -d '"' -f4)
+          wget https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_${TRIVY_VERSION#v}_Linux-64bit.deb
+          sudo dpkg -i trivy_${TRIVY_VERSION#v}_Linux-64bit.deb
 
       - name: Docker Build (Vote)
         run: docker build -t vote-app-test .app/vote
