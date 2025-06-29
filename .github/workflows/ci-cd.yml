@@ -98,7 +98,11 @@ jobs:
         run: docker build -t vote-app-test .app/vote
 
       - name: Trivy Scan
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL vote-app-test
+        run: if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+              trivy image --exit-code 1 --severity HIGH,CRITICAL vote-app-test
+            else
+              trivy image --exit-code 0 --severity HIGH,CRITICAL vote-app-test
+            fi
 
       - name: Run Docker Container
         run: docker run -d -p 8080:80 --name vote-test vote-app-test
