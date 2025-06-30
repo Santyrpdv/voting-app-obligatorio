@@ -204,22 +204,20 @@ jobs:
         run: |
           kubectl apply -f .infra/k8s-specifications/
 
-      - name: Obtener hostname del Load Balancer
-        id: lb
+      - name: Obtener Load Balancer
         run: |
-          kubectl get svc -A
-          chmod +x ./scripts/get-lb-url.sh
-          ./scripts/get-lb-url.sh
+          export LB_HOST=$(kubectl get svc -n ingress-nginx nginx-ingress-ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "LB_HOST=$LB_HOST" >> $GITHUB_ENV
 
       - name: Esperar a que la app esté lista
         run: |
           chmod +x ./scripts/wait-for-app.sh
           ./scripts/wait-for-app.sh http://${{ steps.lb.outputs.lb_hostname }}/vote
 
-      - name: Ejecutar pruebas Postman
+      - name: Ejecutar tests funcionales
         run: |
           npm install -g newman
-          newman run ./tests/postman_collection.json --env-var "host=http://${{ steps.lb.outputs.lb_hostname }}"
+          newman run tests/vote_collection.json --env-var "host=http://${{ env.LB_HOST }}"
 
   # ecr-cleanup:
   #       name: Trigger ECR Cleanup Lambda
