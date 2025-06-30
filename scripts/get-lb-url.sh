@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SERVICE_NAME="vote"
-NAMESPACE="default"
-MAX_RETRIES=20
+SERVICE_NAME="nginx-ingress-ingress-nginx-controller"
+NAMESPACE="ingress-nginx "
+MAX_RETRIES=10
 SLEEP_SECONDS=10
 
 echo "Esperando hostname del Load Balancer para el servicio $SERVICE_NAME..."
