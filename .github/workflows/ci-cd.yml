@@ -212,7 +212,8 @@ jobs:
       - name: Esperar a que la app esté lista
         run: |
           chmod +x ./scripts/wait-for-app.sh
-          ./scripts/wait-for-app.sh http://${{ steps.lb.outputs.lb_hostname }}/vote
+          ./scripts/wait-for-app.sh http://${{ env.LB_HOST }}/vote
+
 
       - name: Ejecutar tests funcionales
         run: |
