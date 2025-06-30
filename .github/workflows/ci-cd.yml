@@ -241,6 +241,9 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
       - name: Terraform Init (Lambda)
         run: terraform init
         working-directory: .infra/terraform/healthcheck-lambda
