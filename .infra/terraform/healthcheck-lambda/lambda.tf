@@ -14,24 +14,6 @@ resource "aws_sns_topic_subscription" "email_sub" {
   endpoint  = "santyrpdv@gmail.com" 
 }
 
-data "aws_iam_role" "lab_role" {
-  name = "LabRole"
-}
-
-resource "aws_iam_role_policy" "allow_publish_sns" {
-  name = "lambda-publish-sns"
-  role = data.aws_iam_role.lab_role.id
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action   = ["sns:Publish"]
-        Effect   = "Allow"
-        Resource = aws_sns_topic.health_alerts.arn
-      }
-    ]
-  })
-}
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
@@ -43,7 +25,7 @@ data "archive_file" "lambda_zip" {
 # Crear función Lambda
 resource "aws_lambda_function" "health_mail_alert" {
   function_name = "health-mail-alert"
-  role          = data.aws_iam_role.lab_role.arn
+  role          = "arn:aws:iam::928352609536:role/c155737a4002552l10231790t1w9283526095-LambdaSLRRole-Buu8xYLRgEC2"
   runtime       = "python3.11"
   handler       = "main.handler"
   filename      = data.archive_file.lambda_zip.output_path
