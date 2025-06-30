@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SERVICE_NAME="nginx-ingress-ingress-nginx-controller"
+SERVICE_NAME="vote"
 NAMESPACE="default"
 MAX_RETRIES=20
 SLEEP_SECONDS=10
