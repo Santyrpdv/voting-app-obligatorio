@@ -207,6 +207,7 @@ jobs:
       - name: Obtener hostname del Load Balancer
         id: lb
         run: |
+          kubectl get svc -A
           chmod +x ./scripts/get-lb-url.sh
           ./scripts/get-lb-url.sh
 
