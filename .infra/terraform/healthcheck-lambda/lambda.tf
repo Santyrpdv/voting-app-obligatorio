@@ -25,7 +25,7 @@ data "archive_file" "lambda_zip" {
 # Crear función Lambda
 resource "aws_lambda_function" "health_mail_alert" {
   function_name = "health-mail-alert"
-  role          = "arn:aws:iam::928352609536:role/c155737a4002552l10231790t1w9283526095-LambdaSLRRole-Buu8xYLRgEC2"
+  role          = "arn:aws:sts::928352609536:assumed-role/voclabs/user4072419=santyrpdv@hotmail.com"
   runtime       = "python3.11"
   handler       = "main.handler"
   filename      = data.archive_file.lambda_zip.output_path
