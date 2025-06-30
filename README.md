@@ -1,65 +1,111 @@
-# Example Voting App
+# Voting App - Proyecto DevOps
 
-A simple distributed application running across multiple Docker containers.
+Este repositorio contiene una aplicación de votación compuesta por múltiples servicios (`vote`, `result`, `worker`), una infraestructura definida con Terraform para su despliegue en Amazon Web Services (AWS), y pipelines de CI/CD automatizados con GitHub Actions.
 
-## Getting started
+## Estructura del Proyecto
 
-Download [Docker Desktop](https://www.docker.com/products/docker-desktop) for Mac or Windows. [Docker Compose](https://docs.docker.com/compose) will be automatically installed. On Linux, make sure you have the latest version of [Compose](https://docs.docker.com/compose/install/).
-
-This solution uses Python, Node.js, .NET, with Redis for messaging and Postgres for storage.
-
-Run in this directory to build and run the app:
-
-```shell
-docker compose up
+```
+.
+├── .app/                  # Código de los microservicios (vote, result, worker)
+├── .infra/
+│   ├── terraform/         # Infraestructura como código (EKS, VPC, etc.)
+│   │   ├── dev.tfvars     # Variables para entorno Dev
+│   │   ├── test.tfvars    # Variables para entorno Test
+│   │   ├── prod.tfvars    # Variables para entorno Prod
+│   ├── k8s-specifications/ # Archivos YAML de despliegue para K8s
+│   └── healthcheck-lambda/ # Lambda opcional de monitoreo
+├── .github/workflows/     # Pipelines de CI/CD
+├── scripts/               # Scripts de utilidad (espera, test, etc.)
+└── tests/                 # Tests funcionales (colecciones Postman)
 ```
 
-The `vote` app will be running at [http://localhost:8080](http://localhost:8080), and the `results` will be at [http://localhost:8081](http://localhost:8081).
+## Despliegue
 
-Alternately, if you want to run it on a [Docker Swarm](https://docs.docker.com/engine/swarm/), first make sure you have a swarm. If you don't, run:
+### Requisitos previos
 
-```shell
-docker swarm init
+- AWS CLI configurado
+- Terraform ≥ 1.5.0
+- kubectl
+- Docker
+- Cuenta en SonarCloud
+- Repositorio en GitHub con Secrets configurados
+
+### Secrets requeridos
+
+En GitHub Actions (`Settings > Secrets`):
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN`
+- `AWS_REGION`
+- `SONAR_TOKEN`
+
+### Despliegue automático (vía GitHub Actions)
+
+1. Hacer push a la rama correspondiente:
+   - `dev` → Despliega en entorno de desarrollo.
+   - `test` → Corre quality gates y tests funcionales.
+   - `main` → Requiere aprobación manual y despliega a producción.
+
+2. El pipeline:
+   - Crea/actualiza infraestructura con Terraform.
+   - Ejecuta análisis de código (SonarCloud).
+   - Escanea imágenes Docker (Trivy).
+   - Construye y sube imágenes a Amazon ECR.
+   - Aplica los manifiestos Kubernetes en EKS.
+   - Corre tests funcionales con Newman.
+
+### Despliegue manual (infraestructura)
+
+```bash
+cd .infra/terraform
+terraform init
+terraform plan -var-file=dev.tfvars
+terraform apply -auto-approve -var-file=dev.tfvars
 ```
 
-Once you have your swarm, in this directory run:
+### Aplicación en Kubernetes
 
-```shell
-docker stack deploy --compose-file docker-stack.yml vote
+```bash
+# Cargar configuración de cluster
+aws eks update-kubeconfig --name <nombre_cluster> --region <region>
+
+# Aplicar manifiestos
+kubectl apply -f .infra/k8s-specifications/
 ```
 
-## Run the app in Kubernetes
+##  Observabilidad
 
-The folder k8s-specifications contains the YAML specifications of the Voting App's services.
+- **Dashboard Grafana**: Visualiza uso de CPU, memoria y estado de pods por namespace.
+- **Alertas configuradas**:
+  - Alto uso de CPU.
+  - Uso de memoria mayor al 90%.
 
-Run the following command to create the deployments and services. Note it will create these resources in your current namespace (`default` if you haven't changed it.)
+## Testing
 
-```shell
-kubectl create -f k8s-specifications/
-```
+- **Funcional**: Automatizado con Newman y Postman.
+- **Estático**: Análisis con SonarCloud.
+- **Seguridad**: Escaneo de imágenes con Trivy.
 
-The `vote` web app is then available on port 31000 on each host of the cluster, the `result` web app is available on port 31001.
+## Tecnologías utilizadas
 
-To remove them, run:
+- AWS (EKS, ECR, Lambda)
+- Terraform
+- Kubernetes
+- Docker
+- GitHub Actions
+- Prometheus + Grafana
+- SonarCloud
+- Trivy
+- Postman / Newman
 
-```shell
-kubectl delete -f k8s-specifications/
-```
+##  Autor
 
-## Architecture
+Santiago Rafael Paris Della Valle  
+Proyecto Obligatorio DevOps 2025  
+Universidad ORT
+---
 
-![Architecture diagram](architecture.excalidraw.png)
+## 📄 Licencia
 
-* A front-end web app in [Python](/vote) which lets you vote between two options
-* A [Redis](https://hub.docker.com/_/redis/) which collects new votes
-* A [.NET](/worker/) worker which consumes votes and stores them in…
-* A [Postgres](https://hub.docker.com/_/postgres/) database backed by a Docker volume
-* A [Node.js](/result) web app which shows the results of the voting in real time
-
-## Notes
-
-The voting application only accepts one vote per client browser. It does not register additional votes if a vote has already been submitted from a client.
-
-This isn't an example of a properly architected perfectly designed distributed app... it's just a simple
-example of the various types of pieces and languages you might see (queues, persistent data, etc), and how to
-deal with them in Docker at a basic level.
+Este proyecto fue desarrollado con fines educativos y académicos.
