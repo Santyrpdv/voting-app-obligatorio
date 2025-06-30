@@ -35,9 +35,10 @@ resource "aws_iam_role_policy" "allow_publish_sns" {
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/healthcheck-lambda"
+  source_dir  = "${path.module}"
   output_path = "${path.module}/healthcheck-lambda.zip"
 }
+
 
 # Crear función Lambda
 resource "aws_lambda_function" "health_mail_alert" {
