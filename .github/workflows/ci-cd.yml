@@ -203,6 +203,15 @@ jobs:
       - name: Deploy Kubernetes Manifests
         run: |
           kubectl apply -f .infra/k8s-specifications/
+
+      - name: Esperar a que esté disponible
+        run: |
+          sleep 30  # o usar un healthcheck si querés algo más confiable
+
+      - name: Run Postman tests
+        run: |
+          npm install -g newman
+          newman run ./tests/postman_collection.json --reporters cli,json
   # ecr-cleanup:
   #       name: Trigger ECR Cleanup Lambda
   #       runs-on: ubuntu-latest
