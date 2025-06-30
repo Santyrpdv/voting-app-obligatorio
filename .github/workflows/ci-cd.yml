@@ -217,7 +217,8 @@ jobs:
       - name: Ejecutar tests funcionales
         run: |
           npm install -g newman
-          newman run tests/vote_collection.json --env-var "host=http://${{ env.LB_HOST }}"
+          newman run ./tests/vote_collection.json --env-var "host=http://${{ env.LB_HOST }}"
+
 
   # ecr-cleanup:
   #       name: Trigger ECR Cleanup Lambda
