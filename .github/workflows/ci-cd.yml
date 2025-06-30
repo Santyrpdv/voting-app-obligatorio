@@ -204,14 +204,22 @@ jobs:
         run: |
           kubectl apply -f .infra/k8s-specifications/
 
-      - name: Esperar a que esté disponible
+      - name: Obtener hostname del Load Balancer
+        id: lb
         run: |
-          sleep 30  # o usar un healthcheck si querés algo más confiable
+          chmod +x ./scripts/get-lb-url.sh
+          ./scripts/get-lb-url.sh
 
-      - name: Run Postman tests
+      - name: Esperar a que la app esté lista
+        run: |
+          chmod +x ./scripts/wait-for-app.sh
+          ./scripts/wait-for-app.sh http://${{ steps.lb.outputs.lb_hostname }}/vote
+
+      - name: Ejecutar pruebas Postman
         run: |
           npm install -g newman
-          newman run ./tests/postman_collection.json --reporters cli,json
+          newman run tests/postman_collection.json --env-var "host=http://${{ steps.lb.outputs.lb_hostname }}"
+
   # ecr-cleanup:
   #       name: Trigger ECR Cleanup Lambda
   #       runs-on: ubuntu-latest
