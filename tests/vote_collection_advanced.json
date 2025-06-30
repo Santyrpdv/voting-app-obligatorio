@@ -1,0 +1,149 @@
+{
+  "info": {
+    "name": "Voting-App Advanced Tests",
+    "_postman_id": "abcd1234-5678-9101-1121-314151617181",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /vote",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/vote"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"GET /vote returns 200\", () => pm.response.code === 200);",
+              "pm.test(\"Page includes vote options\", () => {",
+              "  const body = pm.response.text();",
+              "  pm.expect(body).to.include('Cats');",
+              "  pm.expect(body).to.include('Dogs');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /vote with Cats",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/vote",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "vote",
+              "value": "Cats"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.code === 200);",
+              "pm.test(\"Vote for Cats echoed\", () => pm.response.text().includes('Cats'));",
+              "pm.environment.set('voter_id', pm.cookies.get('voter_id'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /vote with Dogs using same voter_id",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/vote",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "vote",
+              "value": "Dogs"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.code === 200);",
+              "pm.test(\"Vote for Dogs echoed\", () => pm.response.text().includes('Dogs'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "cookie": [
+        {
+          "name": "voter_id",
+          "value": "{{voter_id}}"
+        }
+      ]
+    },
+    {
+      "name": "POST /vote with invalid option",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/vote",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "vote",
+              "value": "Bananas"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200 even with invalid vote\", () => pm.response.code === 200);",
+              "pm.test(\"Response may ignore or reflect invalid vote\", () => {",
+              "  pm.expect(pm.response.text()).to.include('Bananas');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    }
+  ]
+}

@@ -219,26 +219,37 @@ jobs:
         run: |
           npm install -g newman
           newman run ./tests/vote_collection.json --env-var "base_url=http://${{ env.LB_HOST }}"
+          newman run ./tests/vote_collection_advanced.json --env-var "base_url=http://${{ env.LB_HOST }}"
+
+  lambda-alert:
+    name: Terraform Lambda ‑ Health‑alert
+    runs-on: ubuntu-latest
+    needs: deploy-k8s 
+
+    env:
+      LB_HOST: ${{ needs.deploy-k8s.outputs.lb.lb_hostname }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init (Lambda)
+        run: terraform init
+        working-directory: .infra/terraform/healthcheck-lambda
+
+      - name: Terraform Apply (Lambda)
+        run: |
+          terraform apply -auto-approve \
+          -var 'url_list=["http://${{ env.LB_HOST }}/vote","http://${{ env.LB_HOST }}/result"]'
+        working-directory: .infra/terraform/healthcheck-lambda
 
 
-  # ecr-cleanup:
-  #       name: Trigger ECR Cleanup Lambda
-  #       runs-on: ubuntu-latest
-  #       needs: deploy-k8s 
 
-  #       steps:
-  #         - name: Configure AWS credentials
-  #           uses: aws-actions/configure-aws-credentials@v2
-  #           with:
-  #             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #             aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-  #             aws-region: ${{ env.AWS_REGION }}
-
-  #         - name: Invoke Lambda to clean old ECR images
-  #           run: |
-  #             aws lambda invoke \
-  #               --function-name ecr-cleanup \
-  #               --invocation-type Event \
-  #               --region $AWS_REGION \
-  #               out.json
