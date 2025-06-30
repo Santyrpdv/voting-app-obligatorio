@@ -219,7 +219,7 @@ jobs:
       - name: Ejecutar pruebas Postman
         run: |
           npm install -g newman
-          newman run tests/postman_collection.json --env-var "host=http://${{ steps.lb.outputs.lb_hostname }}"
+          newman run ./tests/postman_collection.json --env-var "host=http://${{ steps.lb.outputs.lb_hostname }}"
 
   # ecr-cleanup:
   #       name: Trigger ECR Cleanup Lambda
