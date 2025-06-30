@@ -17,7 +17,7 @@ resource "aws_sns_topic_subscription" "email_sub" {
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}"
+  source_dir  = "${path.module}/main.py"
   output_path = "${path.module}/healthcheck-lambda.zip"
 }
 
