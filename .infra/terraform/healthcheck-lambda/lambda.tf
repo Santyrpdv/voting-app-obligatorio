@@ -21,6 +21,9 @@ data "archive_file" "lambda_zip" {
   output_path = "${path.module}/healthcheck-lambda.zip"
 }
 
+data "aws_iam_role" "lab_role" {
+  name = "LabRole"
+}
 
 # Crear función Lambda
 resource "aws_lambda_function" "health_mail_alert" {
