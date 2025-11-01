@@ -179,7 +179,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
           version: "latest"
 
